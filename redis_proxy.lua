@@ -97,8 +97,9 @@ function _M.get_redis_addr(self,cmd)
     local index = math.random(1,#nodes)
     return nodes[index]
 end
-
-function _M.redis_proxy(self , cmd , ...)
+-- luajit不能变长参数，只能解释执行。为了不影响性能，把参数以table形式传过来
+-- function _M.redis_proxy(self , cmd , ...) 
+function _M.redis_proxy(self , cmd , params)
     if string.len(cmd) < MIN_CMD_LEN then
         return E_INVALID_CMD,nil,"invalid cmd name:" .. cmd
     end
@@ -158,7 +159,7 @@ function _M.redis_proxy(self , cmd , ...)
     end
     local res = ""
     if not_pipeline then
-        res,err = func(red, ...)
+        res,err = func(red, unpack(params))
 	    if not res then
             if self.log then
 	            ngx.log(ngx.ERR ,"failed to exec func: " .. err)
@@ -167,9 +168,8 @@ function _M.redis_proxy(self , cmd , ...)
         end 
     else
         -- pipeline处理
-        local commands = ...
         red:init_pipeline()
-        for k,v in pairs(commands) do 
+        for k,v in pairs(params) do 
             local command = table.remove(v,1)
             func = red[command]
             if nil == func then
