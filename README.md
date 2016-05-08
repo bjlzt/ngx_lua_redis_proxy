@@ -20,16 +20,13 @@ curl 'http://lua.com:8888/rds' -d 'pipeline=[["set","k","v"],["set","kk","vv"],[
 
 http://lua.com:8888/rds/mset/k1/v1/k2/v2/k3/v3/k4/bbbbb/k5/bbb
 
-
 {
   code: 0,
   response: "OK"
 }
 
 
-
 http://lua.com:8888/rds/mget/k1/k2/k3/k8
-
 
 {
   code: 0,
@@ -40,3 +37,7 @@ http://lua.com:8888/rds/mget/k1/k2/k3/k8
     null
   ]
 }
+
+
+
+下一步：支持auth
