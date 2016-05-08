@@ -46,25 +46,31 @@ _M.nodes = {
 local mt = { __index = _M }
 
 -- 所有写命令
-local w_commands = {
+local w_commands = { 
     brpoplpush=1,rpush=1,rpoplpush=1,rpushx=1,sadd=1,
-    hdel=1,hincrby=1,hincrbyfloat=1,hsetnx=1,hset=1,
+    brpop=1,blpop=1,lpop=1,rpop=1,
+    hdel=1,hincrby=1,hincrbyfloat=1,hsetnx=1,hset=1,hmset=1,
     incr=1,incrby=1,incrbyfloat=1,decr=1,decrby=1,del=1,expire=1,expireat=1,append=1,set=1,
-    setex=1,setnx=1,setrange=1,
+    setex=1,setnx=1,setrange=1,sunionstore=1,
     linsert=1,lpush=1,lpushx=1,lrem=1,lset=1,ltrim=1,
     migrate=1,move=1,
     mset=1,msetnx=1,psetex=1,
     persist=1,pexpire=1,pexpireat=1,
     rename=1,renamenx=1,
     setbit=1,bitop=1,
+    sdiffstore=1,sinterstore=1,
     smove=1,spop=1,srem=1,
+    zadd=1,zinterstore=1,zincrby=1,zrem=1,zremrangebyrank=1,zremrangebyscore=1,zunionstore=1,
     pipeline=1,
 }
--- 禁止执行的命令
-local forbidden_commands = {
-    client=1,config=1,bgsave=1,bgrewriteaof=1,eval=1,flushall=1,flushdb=1,save=1,
-    script=1,sync=1,
-
+-- 禁止执行的命令:script、sevice、transaction（事务）类命令暂时不支持
+local forbidden_commands = { 
+    slaveof=1,slowlog=1,
+    shutdown=1,client=1,config=1,bgsave=1,bgrewriteaof=1,flushall=1,flushdb=1,save=1,sync=1,
+    script=1,
+    psubscribe=1,publish=1,pubsub=1,punsubscribe=1,subscribe=1,unsubscribe=1,
+    evalsha=1,eval=1,
+    discard=1,exec=1,multi=1,unwatch=1,watch=1,
 }
 
 function _M.new(self)
