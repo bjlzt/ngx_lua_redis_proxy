@@ -13,9 +13,6 @@ local ret = {
     response="",
 }
 
-ngx.say(funcs:json_encode('a','b',333))
-ngx.exit(200)
-
 -- 获取参数中的db信息
 if var.is_args == "?" then
     local uri_args = ngx.req.get_uri_args()
