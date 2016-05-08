@@ -4,7 +4,7 @@ local var = ngx.var
 
 local rds = redis_proxy:new()
 -- 是否返回redis server信息
-local is_ret_server = false
+local is_ret_server = true
 
 -- 返回信息结构
 local ret = {
@@ -19,6 +19,10 @@ if var.is_args == "?" then
     if uri_args.db ~= nil then
         local db = tonumber(uri_args.db)
         rds:select(db)
+    end
+    if uri_args.auth ~= nil then
+        local auth = tonumber(uri_args.auth)
+        rds:auth(auth)
     end
 end
 
@@ -76,4 +80,3 @@ if is_ret_server then
 end
 
 ngx.say(funcs:json_encode(ret))
-
