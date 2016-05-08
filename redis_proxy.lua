@@ -7,6 +7,7 @@ _M.is_write = false
 _M.log = true
 -- 使用的db
 _M.db = 0
+_M.auth_pass = ""
 -- 支持的最大db编号
 _M.max_db_num = 16
 -- 默认超时时间
@@ -30,15 +31,16 @@ local E_CONNECT_FAIL = 3
 local E_INVALID_DB = 4
 local E_SELECT_DB_FAIL = 5
 local E_EXEC_FAIL = 6
+local E_INVALID_PASS = 10
 
 _M.nodes = {
     read={
-        {addr="127.0.0.1",port=6379,timeout=1000},
-        {addr="127.0.0.1",port=6378,timeout=1000},
+        {addr="10.4.96.12",port=6379,timeout=3000},
+        {addr="10.4.18.129",port=6379,timeout=3000},
         --{addr="unix:/path/to/unix.sock",port=nil,timeout=1000},
     },
     write={
-        {addr="127.0.0.1",port=6378,timeout=1000},
+        {addr="10.4.18.129",port=6379,timeout=3000},
         --{addr="unix:/path/to/unix.sock",port=nil,timeout=1000},
     }
 }
@@ -46,7 +48,7 @@ _M.nodes = {
 local mt = { __index = _M }
 
 -- 所有写命令
-local w_commands = { 
+local w_commands = {
     brpoplpush=1,rpush=1,rpoplpush=1,rpushx=1,sadd=1,
     brpop=1,blpop=1,lpop=1,rpop=1,
     hdel=1,hincrby=1,hincrbyfloat=1,hsetnx=1,hset=1,hmset=1,
@@ -64,7 +66,7 @@ local w_commands = {
     pipeline=1,
 }
 -- 禁止执行的命令:script、sevice、transaction（事务）类命令暂时不支持
-local forbidden_commands = { 
+local forbidden_commands = {
     slaveof=1,slowlog=1,
     shutdown=1,client=1,config=1,bgsave=1,bgrewriteaof=1,flushall=1,flushdb=1,save=1,sync=1,
     script=1,
@@ -155,6 +157,16 @@ function _M.redis_proxy(self , cmd , params)
     if self.db > self.max_db_num then
         return E_INVALID_DB,nil,"ERR invalid DB index:" .. self.db ..",supported max DB index : " .. self.max_db_num
     end
+
+    if self.auth_pass ~= nil and string.len(self.auth_pass) > 0 then
+        ok, err = red:auth(self.auth_pass)
+        if not ok then
+            if self.log then
+	            ngx.log(ngx.ERR ,"failed to auth: ".. err)
+            end
+            return E_INVALID_PASS,ok,err
+        end
+    end
     
     ok, err = red:select(self.db)
     if not ok then
@@ -210,6 +222,9 @@ end
 
 function _M.select(self,dbNum)
     self.db = dbNum
+end
+function _M.auth(self,auth)
+    self.auth_pass = auth
 end
 
 return _M
