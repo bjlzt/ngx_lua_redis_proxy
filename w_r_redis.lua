@@ -39,6 +39,7 @@ if "GET" == method then
         table.remove(params,1)
         table.remove(params,1)
 	    local cmd = table.remove(params,1)
+	    cmd = string.lower(cmd)
 	    code,res,err = rds:redis_proxy(cmd,params);
     end
 
