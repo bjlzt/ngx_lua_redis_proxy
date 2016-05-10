@@ -99,7 +99,7 @@ class lua_redis
         do 
         {
             $tmp = json_decode($str,true);
-            $ret = json_last_error());
+            $ret = json_last_error();
             if ($ret != JSON_ERROR_NONE)
             {
                 $this->error_ .= "json_decode失败： $ret,str=$str";
