@@ -44,4 +44,4 @@ http://lua.com:8888/rds/mget/k1/k2/k3/k8
 如果需要选择不同的库，参数中加db=dbNum ,如http://lua.com:8888/rds/mget/k1/k2/k3/k8?db=1
 
 完整示例：
-http://lua.com:8888/rds/mget/k1/k2/k3/k8?=1&auth=password
+http://lua.com:8888/rds/mget/k1/k2/k3/k8?db=1&auth=password
