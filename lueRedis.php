@@ -19,8 +19,8 @@
 demo : 
     $test = lua_redis::getInstance();
 
-    $test->set('k1','v1');
-    $test->get('k1');
+    $ret = $test->set('k1','v1');
+    $ret = $test->get('k1');
 
     $test->mset('k1','v1','k2','v2');
     $test->mget('k1','k2','k3','k4');
@@ -28,14 +28,14 @@ demo :
     //pipeline
     $test->pipeline('mset','k1','v1','k2','v2');
     $test->pipeline('mget','k1','k2','k3');
-    $test->commit();
+    $ret = $test->commit();
 */
 class lua_redis
 {
     private $url_ = 'http://10.4.18.124/rds';
     private $db_ = 1;
     private $auth_ = null;
-    private $debug_ = 0;
+    private $debug_ = 1;
     private $error_ = null;
     public $commands_ = [];
 
@@ -62,7 +62,7 @@ class lua_redis
             $command .= '/'. implode('/',$params);
 
         $url = $this->url_ .'/' . $command . '?' . $this->genArgs(); 
-        $ret = $this->get($url);
+        return $this->getReq($url);
     }
     /**
      *@desc pipeline调用
@@ -81,9 +81,12 @@ class lua_redis
 
         $data['pipeline'] = json_encode($this->commands_);
         $url = $this->url_ .'?' . $this->genArgs();
-        $ret = $this->post($url,$data);
+        return $this->post($url,$data);
     }
-    public function get($url,$headers = [])
+    /**
+     *@desc 调用get方法：函数名不能使用get，因为redis中存在这个命令
+     */
+    public function getReq($url,$headers = [])
     {
         $ret = $this->http($url,'GET',NULL,$headers);
         return $ret;
@@ -98,9 +101,10 @@ class lua_redis
         $result = false;
         do 
         {
-            $tmp = json_decode($str,true);
-            $ret = json_last_error();
-            if ($ret != JSON_ERROR_NONE)
+            $ret = json_decode($str,true);
+            print_r($ret);
+            $errno = json_last_error();
+            if ($errno != JSON_ERROR_NONE)
             {
                 $this->error_ .= "json_decode失败： $ret,str=$str";
                 break;
@@ -149,8 +153,8 @@ class lua_redis
         {
             curl_setopt($ci, CURLOPT_HTTPHEADER, $headers);
         }
-
         $response = curl_exec($ci);
+        var_dump($response);
         
         if ($response === false)
         {
@@ -171,9 +175,10 @@ class lua_redis
 
 
 $test = lua_redis::getInstance();
-    $test->set('k1','v1');
-    $test->get('k1');
-    exit;
+    //print_r($test->set('k1','v1'));
+    print_r($test->get('k1'));
+    /*
 $test->pipeline('mset','k1','v1','k2','v2');
 $test->pipeline('mget','k1','k2','k3');
-$test->commit();
+print_r($test->commit());
+     */
