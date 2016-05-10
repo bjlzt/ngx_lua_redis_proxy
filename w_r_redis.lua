@@ -4,7 +4,7 @@ local var = ngx.var
 
 local rds = rds_proxy:new()
 -- 是否返回redis server信息
-local is_ret_server = true
+local is_ret_server = 0
 
 -- 返回信息结构
 local ret = {
@@ -23,6 +23,9 @@ if var.is_args == "?" then
     if uri_args.auth ~= nil then
         local auth = tonumber(uri_args.auth)
         rds:auth(auth)
+    end
+    if uri_args.debug ~= nil then
+        is_ret_server = tonumber(uri_args.debug)
     end
 end
 
