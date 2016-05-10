@@ -33,17 +33,7 @@ local E_SELECT_DB_FAIL = 5
 local E_EXEC_FAIL = 6
 local E_INVALID_PASS = 10
 
-_M.nodes = {
-    read={
-        {addr="10.4.96.12",port=6379,timeout=3000},
-        {addr="10.4.18.129",port=6379,timeout=3000},
-        --{addr="unix:/path/to/unix.sock",port=nil,timeout=1000},
-    },
-    write={
-        {addr="10.4.18.129",port=6379,timeout=3000},
-        --{addr="unix:/path/to/unix.sock",port=nil,timeout=1000},
-    }
-}
+local redis_nodes = require 'redis_nodes'
 
 local mt = { __index = _M }
 
@@ -97,9 +87,9 @@ function _M.get_redis_addr(self,cmd)
 
     local nodes = {}
     if is_write then
-        nodes = self.nodes["write"]
+        nodes = redis_nodes.nodes["write"]
     else
-        nodes = self.nodes["read"]
+        nodes = redis_nodes.nodes["read"]
     end
 
     local index = math.random(1,#nodes)
