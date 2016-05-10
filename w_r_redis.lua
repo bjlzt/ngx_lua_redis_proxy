@@ -1,8 +1,8 @@
 local funcs = require "functions"
-local redis_proxy = require "redis_proxy"
+local rds_proxy = require "redis_proxy"
 local var = ngx.var
 
-local rds = redis_proxy:new()
+local rds = rds_proxy:new()
 -- 是否返回redis server信息
 local is_ret_server = true
 
