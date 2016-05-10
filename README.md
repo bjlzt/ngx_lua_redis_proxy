@@ -45,3 +45,6 @@ http://lua.com:8888/rds/mget/k1/k2/k3/k8
 
 完整示例：
 http://lua.com:8888/rds/mget/k1/k2/k3/k8?db=1&auth=password
+
+
+url中使用debug=1，打印调试信息
