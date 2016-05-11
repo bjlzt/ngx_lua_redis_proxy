@@ -48,8 +48,4 @@ http://lua.com:8888/rds/mget/k1/k2/k3/k8?db=1&auth=password
 
 
 url中使用debug=1，打印调试信息
-
-
-
-
-下一步，加上业务相关的参数，如srv=product1
+url中使用srv=product_name，不同的业务使用不同的redis集群
