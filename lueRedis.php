@@ -35,7 +35,8 @@ class lua_redis
     private $url_ = 'http://10.4.18.124/rds';
     private $db_ = 1;
     private $auth_ = null;
-    private $debug_ = 1;
+    private $debug_ = 0;
+    private $srv_ = 'duoshuo';
     private $error_ = null;
     public $commands_ = [];
 
@@ -102,7 +103,6 @@ class lua_redis
         do 
         {
             $ret = json_decode($str,true);
-            print_r($ret);
             $errno = json_last_error();
             if ($errno != JSON_ERROR_NONE)
             {
@@ -121,13 +121,15 @@ class lua_redis
     }
     private function genArgs()
     {
-        $uri = 'debug=' . $this->debug_; 
+        $uri = 'srv=' . (empty($this->srv_) ? 'default' : $this->srv_); 
         if ($this->db_)
             $uri .= '&db='.$this->db_;
-        if ($this->auth_)
+        if (!empty($this->auth_))
         {
-            $uri = '&auth=' . $this->auth_;
+            $uri .= '&auth=' . $this->auth_;
         }
+        if ($this->debug_)
+            $uri .= '&debug=' . $this->debug_;
         return $uri;
     }
     public function http($url, $method = 'GET', $postfields = NULL, $headers = array()) 
@@ -154,7 +156,6 @@ class lua_redis
             curl_setopt($ci, CURLOPT_HTTPHEADER, $headers);
         }
         $response = curl_exec($ci);
-        var_dump($response);
         
         if ($response === false)
         {
@@ -172,13 +173,17 @@ class lua_redis
     }
 }
 
-
-
 $test = lua_redis::getInstance();
-    //print_r($test->set('k1','v1'));
-    print_r($test->get('k1'));
-    /*
+$ret = $test->mset('k1','v1','k2','v2','k3');
+var_dump($ret);
+
+$ret = $test->mset('k1','v1','k2','v2');
+var_dump($ret);
+
+$ret = $test->mget('k1','k2','k3');
+print_r($ret);
+
 $test->pipeline('mset','k1','v1','k2','v2');
 $test->pipeline('mget','k1','k2','k3');
-print_r($test->commit());
-     */
+$ret = $test->commit();
+print_r($ret);
