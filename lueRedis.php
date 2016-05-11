@@ -117,6 +117,7 @@ class RedisProxy
             return false;
         }
         $data['pipeline'] = json_encode($this->commands_);
+        $this->commands_ = [];
         $url = $this->url_ .'?' . $this->genArgs();
         return $this->post($url,$data);
     }
