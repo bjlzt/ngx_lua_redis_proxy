@@ -1,8 +1,8 @@
 local funcs = require "functions"
-local rds_proxy = require "redis_proxy"
+local proxy = require "redis_proxy"
 local var = ngx.var
 
-local rds = rds_proxy:new()
+local rds = proxy:new()
 -- 是否返回redis server信息
 local is_ret_server = 0
 
@@ -17,15 +17,16 @@ local ret = {
 if var.is_args == "?" then
     local uri_args = ngx.req.get_uri_args()
     if uri_args.db ~= nil then
-        local db = tonumber(uri_args.db)
-        rds:select(db)
+        rds:select(tonumber(uri_args.db))
     end
     if uri_args.auth ~= nil then
-        local auth = tonumber(uri_args.auth)
-        rds:auth(auth)
+        rds:auth(uri_args.auth)
     end
     if uri_args.debug ~= nil then
-        is_ret_server = tonumber(uri_args.debug)
+        is_ret_server  = tonumber(uri_args.debug)
+    end
+    if uri_args.srv ~= nil then
+        rds:set_srv(uri_args.srv)
     end
 end
 
@@ -73,7 +74,7 @@ ret.msg = err
 ret.response = res
 
 -- server info
-if is_ret_server then
+if is_ret_server > 0 then
     ret.server = rds.current_node
     ret.cmd = cmd
     ret.op = "read"
@@ -82,4 +83,4 @@ if is_ret_server then
     end
 end
 
-ngx.say(funcs:json_encode(ret))
+ngx.print(funcs:json_encode(ret))
