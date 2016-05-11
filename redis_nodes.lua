@@ -1,5 +1,8 @@
 local _M = {}
-_M.nodes = { 
+
+_M.nodes = {}
+
+_M.nodes['default'] = { 
     read={
         {addr="10.4.96.12",port=6379,timeout=3000},
         {addr="10.4.96.13",port=6379,timeout=3000},
