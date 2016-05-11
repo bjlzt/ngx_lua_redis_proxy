@@ -8,7 +8,7 @@
 /**
  *@file LuaRedis.php
  *
- *@brief
+ *@brief 请求redis-proxy类: 此类发起api请求，获取redis命令原生结果（和redis扩展结果不一样）,返回值需要自己处理：具体命令返回值参考redis手册
  *
  *@author liuzhantao@bytedance.com
  *@date   2016-05-08
@@ -30,7 +30,7 @@ demo :
     $test->pipeline('mget','k1','k2','k3');
     $ret = $test->commit();
 */
-class lua_redis
+class LuaRedis
 {
     private $url_ = 'http://10.4.18.124/rds';
     private $db_ = 1;
@@ -42,6 +42,11 @@ class lua_redis
 
     static private $instance_ = null;
 
+
+    public static function getOne()
+    {
+        return self::getInstance();
+    }
     public static function getInstance()
     {
         if (self::$instance_ == null)
@@ -63,7 +68,34 @@ class lua_redis
             $command .= '/'. implode('/',$params);
 
         $url = $this->url_ .'/' . $command . '?' . $this->genArgs(); 
-        return $this->getReq($url);
+        $result = $this->getReq($url);
+
+        return $this->parseGetReq($func,$result);
+    }
+    /**
+     *@desc 解析命令返回值
+     */
+    private function parseGetReq($command,$result)
+    {
+        if (empty($result))
+        {
+            return $result;
+        }
+        $cmd = strtolower($command);
+        $ret = $result;
+        $method = 'parse_'.$cmd;
+        if (method_exists($this,$method))
+        {
+            $ret = $this->$method($result);
+        }
+        return $ret;
+    }
+    /**
+     *@desc 解析zrevrangebyscore命令返回值
+     */
+    private function parse_zrevrangebyscore($params)
+    {
+         
     }
     /**
      *@desc pipeline调用
@@ -172,18 +204,3 @@ class lua_redis
         return $this->parseResponse($response);
     }
 }
-
-$test = lua_redis::getInstance();
-$ret = $test->mset('k1','v1','k2','v2','k3');
-var_dump($ret);
-
-$ret = $test->mset('k1','v1','k2','v2');
-var_dump($ret);
-
-$ret = $test->mget('k1','k2','k3');
-print_r($ret);
-
-$test->pipeline('mset','k1','v1','k2','v2');
-$test->pipeline('mget','k1','k2','k3');
-$ret = $test->commit();
-print_r($ret);
