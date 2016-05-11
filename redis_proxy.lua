@@ -136,7 +136,7 @@ function _M.redis_proxy(self , cmd , params)
     -- 获取地址、配制	
     local server = self:get_redis_addr(cmd)	
     if server == nil then
-        return E_INVALID_SERVER,nil,"no valid servers::" .. cmd
+        return E_INVALID_SERVER,nil,"no valid servers for :" .. self.srv
     end
     self.current_node = server
 
