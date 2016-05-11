@@ -8,6 +8,8 @@ _M.log = true
 -- 使用的db
 _M.db = 0
 _M.auth_pass = ""
+-- 业务
+_M.srv = "default"
 -- 支持的最大db编号
 _M.max_db_num = 16
 -- 默认超时时间
@@ -32,6 +34,8 @@ local E_INVALID_DB = 4
 local E_SELECT_DB_FAIL = 5
 local E_EXEC_FAIL = 6
 local E_INVALID_PASS = 10
+local E_INVALID_SERVER = 11
+
 
 local redis_nodes = require 'redis_nodes'
 
@@ -86,10 +90,19 @@ function _M.get_redis_addr(self,cmd)
     local is_write = self:check_is_write(cmd)
 
     local nodes = {}
+    local srv = self.srv
+    if redis_nodes.nodes[srv] == nil then
+        return nil
+    end
+
     if is_write then
-        nodes = redis_nodes.nodes["write"]
+        nodes = redis_nodes.nodes[srv]["write"]
     else
-        nodes = redis_nodes.nodes["read"]
+        nodes = redis_nodes.nodes[srv]["read"]
+    end
+
+    if nodes == nil or #nodes < 1  then
+        return nil  
     end
 
     local index = math.random(1,#nodes)
@@ -122,6 +135,9 @@ function _M.redis_proxy(self , cmd , params)
     end
     -- 获取地址、配制	
     local server = self:get_redis_addr(cmd)	
+    if server == nil then
+        return E_INVALID_SERVER,nil,"no valid servers::" .. cmd
+    end
     self.current_node = server
 
     -- 把db做为pool name的一部分
@@ -215,6 +231,9 @@ function _M.select(self,dbNum)
 end
 function _M.auth(self,auth)
     self.auth_pass = auth
+end
+function _M.set_srv(self,srv)
+    self.srv = srv
 end
 
 return _M
