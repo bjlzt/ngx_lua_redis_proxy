@@ -194,7 +194,7 @@ function _M.redis_proxy(self , cmd , params)
         -- pipeline处理
         red:init_pipeline()
         for k,v in pairs(params) do 
-            local command = table.remove(v,1)
+            local command = string.lower(table.remove(v,1))
             func = red[command]
             if nil == func then
                 red:cancel_pipeline()
